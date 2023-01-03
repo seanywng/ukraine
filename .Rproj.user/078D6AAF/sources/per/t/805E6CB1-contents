@@ -1,0 +1,92 @@
+---
+title: "Untitled"
+output: html_document
+date: '2023-01-02'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rvest)
+library(tidyverse)
+library(lubridate)
+library(magrittr)
+
+theme_set(theme_light())
+```
+
+### This one works 
+
+```{r}
+
+scrape_links <- function(site) {
+  
+  site %>% 
+    read_html() %>%  
+    html_elements("a") %>% 
+    html_attr("href") %>% 
+    as_tibble() %>% 
+    filter(str_detect(value, "https://"))
+}
+
+results <-  
+  bind_rows(map(links, scrape_links))
+
+results %>% 
+  write_csv("reliefweb_ukr_links.csv")
+```
+
+
+```{r}
+
+# Read in the website
+base_url <- "https://reliefweb.int/updates?advanced-search=%28PC241%29_%28F10%29"
+base_webpage <- read_html(base_url)
+
+html_attr(html_nodes(base_webpage, "a"), "href")  
+
+new_urls <- "https://reliefweb.int/report/ukraine/%s"
+
+links <- paste0("https://reliefweb.int/updates?advanced-search=%28PC241%29_%28F10%29&page=", 0:183)
+
+result <- lapply(links, function(x) x %>% 
+                   read_html %>% 
+                   html_nodes("a") %>% 
+                   html_attr("href"))
+
+```
+
+```{r}
+f1 <-  function(x){ 
+  x %>% read_html() %>% 
+    html_attr(html_nodes(., "a"), "href") 
+}
+
+links <- paste0("https://reliefweb.int/updates?advanced-search=%28PC241%29_%28F10%29&page=", 0:183)
+
+df <- lapply(links, possibly(f1, NA))
+
+glimpse(df)
+
+```
+
+
+```{r}
+> url <- "http://stackoverflow.com/questions/3746256/extract-links-from-webpage-using-r"
+> html <- paste(readLines(url), collapse="\n")
+> library(stringr)
+> matched <- str_match_all(html, "<a href=\"(.*?)\"")
+```
+
+
+```{r}
+# Use html_nodes to select the elements you want to scrape
+headings <- html_nodes(webpage, ".card-title > a")
+
+# Extract the text from the selected elements
+headings_text <- html_text(headings)
+
+# Print the scraped text
+headings_text
+
+```
+
