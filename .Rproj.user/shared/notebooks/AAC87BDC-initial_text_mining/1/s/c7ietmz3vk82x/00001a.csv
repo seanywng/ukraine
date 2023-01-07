@@ -1,0 +1,29 @@
+"0","network_graph <- bigrams %>% 
+  filter(bigram %out% c(""million people"", 
+                        ""internally displaced"", 
+                        ""united nations"", 
+                        ""human rights"", 
+                        ""humanitarian assistance"", 
+                        ""february 2022"")) %>% 
+  distinct(id, bigram) %>% 
+  add_count(bigram) %>% 
+  filter(n >= 50) %>% 
+  pairwise_cor(bigram, id, sort = TRUE) %>% 
+  filter(correlation >= .3) %>% 
+  igraph::graph_from_data_frame() %>% 
+  ggraph(layout = ""stress"") + 
+  geom_edge_link(aes(alpha = correlation), 
+                 colour = ""blue"", 
+                 check_overlap = TRUE) + 
+  scale_alpha_continuous(range = c(.1, .4)) + 
+  geom_node_point(colour = ""blue"", alpha = .1) + 
+  geom_node_text(aes(label = name), size = 2, 
+                 vjust = 1, hjust = 1, 
+                 check_overlap = TRUE) +
+  theme(legend.position = ""none"") + 
+  labs(title = ""Network graphs of Reliefweb bigrams related to the Ukraine conflict in 2022"", 
+       subtitle = ""Data source: https://reliefweb.int/"")
+"
+"2","Error in filter(., bigram %out% c(""million people"", ""internally displaced"",  : 
+  object 'bigrams' not found
+"

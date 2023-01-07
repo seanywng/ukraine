@@ -1,0 +1,25 @@
+"0","words <- rw %>% 
+  select(id, body) %>% 
+  unnest_tokens(word, body) %>% 
+  count(id, word, sort = TRUE) %>% 
+  anti_join(stop_words, by = ""word"") %>% 
+  filter(str_detect(word, ""[a-z]"")) %>%
+  mutate(word = str_remove_all(word, ""'"")) %>% 
+  mutate(stem = wordStem(word, language = ""porter"")) %>% 
+  filter(stem %out% c(""de"", ""des"", ""la"", ""las"", ""le"", ""les"", 
+                      ""en"", ""el"", ""http"", ""se"", ""ses"")) %>% 
+  filter(!str_detect(item1, ""ukraine|ukrainian"") & 
+           !str_detect(item2, ""ukraine|ukrainian"")) %>% 
+  mutate(stem = recode(stem, 
+                       ""ukraine’"" = ""ukrain"")) %>% 
+  filter(nchar(stem) < 20)
+"
+"1","[1m[33mError[39m in `filter()`:[22m
+[38;5;238m[33m![38;5;238m Problem while computing `..1 = !str_detect(item1, ""ukraine|ukrainian"") & ...`.[39m
+[1mCaused by error in `stri_detect_regex()`:[22m
+[33m![39m object 'item1' not found
+Backtrace:
+[90m  1. [39m... %>% filter(nchar(stem) < 20)
+[90m 10. [39m[1mstringr[22m::str_detect(item1, ""ukraine|ukrainian"")
+[90m 11. [39m[1mstringi[22m::stri_detect_regex(...)
+"

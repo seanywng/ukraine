@@ -5,7 +5,7 @@ date: '2023-01-06'
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, fig.width=9, message = FALSE, warning=FALSE)
 
 library(tidyverse)
 library(tidytext)
@@ -25,9 +25,7 @@ library(patchwork)
 ```
 
 
-### Clean the dataset 
-
-
+## Data
 
 ```{r}
 
@@ -69,14 +67,51 @@ rw <- read_csv("./data/scraped_full_20230101_20220101.csv") %>%
 
 # I don't think this is necessary anymore, I'm just going to treat this like 
 # genres in an IMDB scrape 
-rw_dup <- rw %>% 
-  separate_rows(theme, 
-           sep = "\n")
+# rw_dup <- rw %>% 
+#   separate_rows(theme, 
+#            sep = "\n")
 
-glimpse(rw)
+
 ```
 
-### Ukr_words 
+## Titles 
+
+```{r}
+titles <- rw %>% 
+  select(id, title) %>% 
+  unnest_tokens(word, title) %>% 
+  count(id, word, sort = TRUE) %>% 
+  anti_join(stop_words, by = "word") %>% 
+  mutate(word = str_remove_all(word, "'")) %>% 
+  mutate(stem = wordStem(word, language = "porter")) %>% 
+  filter(stem %out% c("de", "des", "la", "las", "le", "les", 
+                      "en", "el", "http", "se", "ses")) %>% 
+  mutate(stem = recode(stem, 
+                       "ukraine’" = "ukrain")) %>% 
+  filter(nchar(stem) < 20)
+  
+```
+
+
+```{r}
+set.seed(2023)
+
+titles %>% 
+  pairwise_count(word, id, sort = TRUE, upper = FALSE) %>%
+  filter(str_detect(item1, "[a-z]") & str_detect(item2, "[a-z]")) %>%
+  filter(n >= 70) %>%
+  igraph::graph_from_data_frame() %>% 
+  ggraph(layout = "lgl") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "cyan4") +
+  geom_node_point(size = 2) +
+  geom_node_text(aes(label = name), repel = TRUE, size = 3, 
+                 point.padding = unit(0.2, "lines")) +
+  theme_void()
+
+```
+
+
+## Words 
 
 ```{r}
 
@@ -90,12 +125,39 @@ words <- rw %>%
   mutate(stem = wordStem(word, language = "porter")) %>% 
   filter(stem %out% c("de", "des", "la", "las", "le", "les", 
                       "en", "el", "http", "se", "ses")) %>% 
+  filter(!str_detect(word, "ukraine|ukrainian|people|humanitarian|support|including|country")) %>% 
   mutate(stem = recode(stem, 
                        "ukraine’" = "ukrain")) %>% 
   filter(nchar(stem) < 20)
 
 
 ```
+
+```{r}
+set.seed(2023)
+
+word_pairs <- words %>% 
+  pairwise_count(word, id, sort = TRUE, upper = FALSE) %>%
+  filter(str_detect(item1, "[a-z]") & str_detect(item2, "[a-z]")) %>% 
+  
+  filter(n >= 500)
+
+word_pairs %>% 
+  igraph::graph_from_data_frame() %>% 
+  ggraph(layout = "lgl") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "darkred") +
+  geom_node_point(size = 2) +
+  geom_node_text(aes(label = name), repel = TRUE, size = 3, 
+                 point.padding = unit(0.2, "lines")) +
+  theme_void()
+  
+word_pairs %>% 
+  filter(n >= 800) %>% 
+  arrange(desc(n))
+```
+
+
+### Tf-idf 
 
 ```{r}
 tf_idf <- words %>% 
@@ -184,8 +246,69 @@ rw %>%
 
 
 ### Thesis 
-
 So, you'll wanna dig around to see where the acled dataset and the humanitarian text mining intersect -- likely some large bombings and the mentions of mine action. 
+
+## Bigrams
+
+
+```{r}
+  bigrams_raw <- tbl %>% 
+    select(id, body) %>% 
+    unnest_tokens(bigram, body, token = "ngrams", n = 2) %>% 
+    filter(!is.na(bigram))
+  
+  bigrams_sep <- bigrams_raw %>% 
+    separate(bigram, c("word1", "word2"), sep = " ") %>% 
+    filter(!word1 %in% stop_words$word & (nchar(word1) < 20)) %>% 
+    filter(!word2 %in% stop_words$word & (nchar(word2) < 20)) %>% 
+    filter(str_detect(word1, "[a-z]") & !str_detect(word1, "<")) %>% 
+    filter(str_detect(word2, "[a-z]") & !str_detect(word2, "<"))
+  
+  bigram_counts <- bigrams_sep %>% count(word1, word2, sort = TRUE)
+  
+  bigrams <- bigrams_sep %>% 
+    unite(bigram, word1, word2, sep = " ")
+  
+  tf_idf_bi <- bigrams %>% 
+    count(id, bigram) %>% 
+    bind_tf_idf(bigram, id, n) %>% 
+    arrange(desc(tf_idf))
+
+```
+
+
+```{r}
+set.seed(2023)
+
+network_graph <- bigrams %>% 
+  filter(bigram %out% c("million people", 
+                        "internally displaced", 
+                        "united nations", 
+                        "human rights", 
+                        "humanitarian assistance", 
+                        "february 2022")) %>% 
+  distinct(id, bigram) %>% 
+  add_count(bigram) %>% 
+  filter(n >= 50) %>% 
+  pairwise_cor(bigram, id, sort = TRUE) %>% 
+  filter(correlation >= .3) %>% 
+  igraph::graph_from_data_frame() %>% 
+  ggraph(layout = "stress") + 
+  geom_edge_link(aes(alpha = correlation), 
+                 colour = "blue", 
+                 check_overlap = TRUE) + 
+  scale_alpha_continuous(range = c(.1, .4)) + 
+  geom_node_point(colour = "blue", alpha = .1) + 
+  geom_node_text(aes(label = name), size = 2, 
+                 vjust = 1, hjust = 1, 
+                 check_overlap = TRUE) +
+  theme(legend.position = "none") + 
+  labs(title = "Network graphs of Reliefweb bigrams related to the Ukraine conflict in 2022", 
+       subtitle = "Data source: https://reliefweb.int/")
+
+ggsave("network_graph.png", network_graph, width = 42, height = 29.7, units = "cm", dpi = 300)
+  
+```
 
 
 
