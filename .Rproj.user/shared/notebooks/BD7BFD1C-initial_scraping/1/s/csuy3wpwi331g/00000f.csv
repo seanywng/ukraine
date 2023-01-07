@@ -1,0 +1,6 @@
+"0","rbind(bind_rows(map(spanish_links, possibly(scrape_links, NA))),
+      bind_rows(map(french_links, possibly(scrape_links, NA)))) %>% 
+  write_csv(""./data/links_to_remove.csv"")
+"
+"2","Error in as_mapper(.f) : object 'scrape_links' not found
+"

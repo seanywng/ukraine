@@ -1,8 +1,0 @@
-"0","df <- lapply(links, possibly(f1, NA))
-"
-"2","Registered S3 methods overwritten by 'htmltools':
-  method               from         
-  print.html           tools:rstudio
-  print.shiny.tag      tools:rstudio
-  print.shiny.tag.list tools:rstudio
-"
