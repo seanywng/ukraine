@@ -2,24 +2,12 @@
 "0","ukr_links <- read_csv(""./data/reliefweb_ukr_links.csv"") %>% "
 "0","  rename(url = value) %>% "
 "0","  mutate(id = row_number())"
-"2","[1mRows: [22m[34m3895[39m [1mColumns: [22m[34m1[39m"
-"2","[36m--[39m [1mColumn specification[22m [36m----------------------------------------------------------------------------[39m
-[1mDelimiter:[22m "",""
-[31mchr[39m (1): value"
-"2","
-[36mi[39m Use `spec()` to retrieve the full column specification for this data.
-[36mi[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0",""
 "0","# This is the list of Spanish and French links "
 "0","to_remove <- read_csv(""./data/links_to_remove.csv"") %>% "
 "0","  rename(url = value) %>% "
 "0","  pull(url)"
-"2","[1mRows: [22m[34m53[39m [1mColumns: [22m[34m1[39m"
-"2","[36m--[39m [1mColumn specification[22m [36m----------------------------------------------------------------------------[39m
-[1mDelimiter:[22m "",""
-[31mchr[39m (1): value"
-"2","
-[36mi[39m Use `spec()` to retrieve the full column specification for this data.
-[36mi[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0",""
 "0","rw <- read_csv(""./data/scraped_full_20230101_20220101.csv"") %>% "
 "0","  mutate(date = dmy(date)) %>% "
 "0","  left_join(ukr_links, by = c(""link"" = ""url"")) %>%"
@@ -46,13 +34,7 @@
 "0","         security = ifelse(str_detect(theme, ""Safety and Security""), 1, 0),"
 "0","         shelter_nfi = ifelse(str_detect(theme, ""Shelter and Non-Food Items""), 1, 0),"
 "0","         wash = ifelse(str_detect(theme, ""Water Sanitation Hygiene""), 1, 0))"
-"2","[1mRows: [22m[34m4218[39m [1mColumns: [22m[34m7[39m"
-"2","[36m--[39m [1mColumn specification[22m [36m----------------------------------------------------------------------------[39m
-[1mDelimiter:[22m "",""
-[31mchr[39m (7): title, type, source, theme, date, body, link"
-"2","
-[36mi[39m Use `spec()` to retrieve the full column specification for this data.
-[36mi[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0",""
 "0","# I don't think this is necessary anymore, I'm just going to treat this like "
 "0","# genres in an IMDB scrape "
 "0","# rw_dup <- rw %>% "

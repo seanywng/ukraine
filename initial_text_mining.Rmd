@@ -201,34 +201,43 @@ ukr_words %>%
 
 ```{r}
 
-selection <- "ACLED"
+frequency_by_source <- function(tbl, source) {
+  
+  source <- enquo(source)
+  sourcen <- quo_name(source)
+  
+  tbl %>% 
+    filter(source == !!source) %>% 
+    slice_max(tf, n = 20) %>% 
+    ungroup() %>% 
+    ggplot(aes(x = tf, 
+               y = fct_reorder(word, tf)))+
+    geom_col(show.legend = FALSE, 
+             fill = "cornflowerblue") + 
+    labs(x = "Term frequency", y = "", 
+         title = paste0("Term frequency -- ", sourcen), 
+         subtitle = "2022-01-01 to 2023-01-01") + 
 
-tf_idf %>%
-  group_by(source) %>% 
-  filter(source == selection) %>% 
-  slice_max(tf, n = 20) %>% 
-  ungroup() %>% 
-  ggplot(aes(x = tf, 
-             y = reorder_within(stem, tf, source, fun = sum),))+ 
-  geom_col(show.legend = FALSE, 
-           fill = "cornflowerblue") + 
-  facet_wrap(~ source, scales = "free") + 
-  scale_y_reordered() + 
-  labs(x = "Term frequency", y = "") + 
+  tbl %>%
+    filter(source == !!source) %>% 
+    slice_max(tf_idf, n = 20) %>% 
+    ungroup() %>% 
+    ggplot(aes(x = tf_idf, 
+               y = fct_reorder(word, tf_idf)))+
+    geom_col(show.legend = FALSE, 
+             fill = "tomato") + 
+    labs(x = "Tf-idf", y = "", 
+         title = paste0("Tf-idf -- ", sourcen), 
+         subtitle = "2022-01-01 to 2023-01-01") 
+    
+}
 
-tf_idf %>%
-  group_by(source) %>% 
-  filter(source == selection) %>% 
-  slice_max(tf_idf, n = 20) %>% 
-  ungroup() %>% 
-  ggplot(aes(x = tf_idf, 
-             y = reorder_within(stem, tf_idf, source, fun = sum),))+ 
-  geom_col(show.legend = FALSE, 
-           fill = "tomato") + 
-  facet_wrap(~ source, scales = "free") + 
-  scale_y_reordered() + 
-  labs(x = "Tf-idf", y = "") 
+frequency_by_source(tf_idf, "EC")
+
+
 ```
+
+I guess IMC really are CIA 
 
 ```{r}
 
@@ -237,76 +246,90 @@ tf_idf %>%
 rw %>% 
   filter(id == 
            tf_idf %>%
-           filter(source == "ACLED" & stem == "lgbt") %>%
+           filter(source == "EC" & word == "euratom") %>%
            sample_n(1) %>%
            pull(id)) %>%
   pull(body)
+
 ```
 
 
 
 ### Thesis 
-So, you'll wanna dig around to see where the acled dataset and the humanitarian text mining intersect -- likely some large bombings and the mentions of mine action. 
+
 
 ## Bigrams
 
 
 ```{r}
-  bigrams_raw <- tbl %>% 
-    select(id, body) %>% 
-    unnest_tokens(bigram, body, token = "ngrams", n = 2) %>% 
-    filter(!is.na(bigram))
+bigrams_sep <- rw %>% 
+  # You're filtering out one clump here 
+  filter(source %out% c("IAEA", "ACLED")) %>% 
+  select(id, body) %>% 
+  unnest_tokens(bigram, body, token = "ngrams", n = 2) %>% 
+  filter(!is.na(bigram)) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+  filter(!word1 %in% stop_words$word & (nchar(word1) < 20)) %>% 
+  filter(!word2 %in% stop_words$word & (nchar(word2) < 20)) %>% 
+  filter(str_detect(word1, "[a-z]") & !str_detect(word1, "<")) %>% 
+  filter(str_detect(word2, "[a-z]") & !str_detect(word2, "<"))
   
-  bigrams_sep <- bigrams_raw %>% 
-    separate(bigram, c("word1", "word2"), sep = " ") %>% 
-    filter(!word1 %in% stop_words$word & (nchar(word1) < 20)) %>% 
-    filter(!word2 %in% stop_words$word & (nchar(word2) < 20)) %>% 
-    filter(str_detect(word1, "[a-z]") & !str_detect(word1, "<")) %>% 
-    filter(str_detect(word2, "[a-z]") & !str_detect(word2, "<"))
+bigram_counts <- bigrams_sep %>% count(word1, word2, sort = TRUE)
   
-  bigram_counts <- bigrams_sep %>% count(word1, word2, sort = TRUE)
-  
-  bigrams <- bigrams_sep %>% 
-    unite(bigram, word1, word2, sep = " ")
-  
-  tf_idf_bi <- bigrams %>% 
-    count(id, bigram) %>% 
-    bind_tf_idf(bigram, id, n) %>% 
-    arrange(desc(tf_idf))
+bigrams <- bigrams_sep %>%
+  unite(bigram, word1, word2, sep = " ")
+
+tf_idf_bigrams <- bigrams %>%
+  count(id, bigram) %>% 
+  bind_tf_idf(bigram, id, n) %>% 
+  arrange(desc(tf_idf))
+
+bigrams_full <- rw %>% 
+  select(id, body) %>% 
+  unnest_tokens(bigram, body, token = "ngrams", n = 2) %>% 
+  filter(!is.na(bigram)) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+  filter(!word1 %in% stop_words$word & (nchar(word1) < 20)) %>% 
+  filter(!word2 %in% stop_words$word & (nchar(word2) < 20)) %>% 
+  filter(str_detect(word1, "[a-z]") & !str_detect(word1, "<")) %>% 
+  filter(str_detect(word2, "[a-z]") & !str_detect(word2, "<")) %>% 
+  unite(bigram, word1, word2, sep = " ")
 
 ```
 
+### Network graph
 
 ```{r}
 set.seed(2023)
 
 network_graph <- bigrams %>% 
   filter(bigram %out% c("million people", 
-                        "internally displaced", 
+                        #"internally displaced", 
                         "united nations", 
-                        "human rights", 
-                        "humanitarian assistance", 
+                        #"human rights", 
+                        #"humanitarian assistance",
                         "february 2022")) %>% 
   distinct(id, bigram) %>% 
   add_count(bigram) %>% 
   filter(n >= 50) %>% 
   pairwise_cor(bigram, id, sort = TRUE) %>% 
-  filter(correlation >= .3) %>% 
+  filter(correlation >= .15) %>% 
   igraph::graph_from_data_frame() %>% 
-  ggraph(layout = "stress") + 
-  geom_edge_link(aes(alpha = correlation), 
-                 colour = "blue", 
-                 check_overlap = TRUE) + 
+  ggraph(layout = "kk") + 
+  geom_edge_fan(aes(alpha = correlation),
+                colour = "cornflowerblue",
+                check_overlap = TRUE,
+                width = .1) + 
   scale_alpha_continuous(range = c(.1, .4)) + 
-  geom_node_point(colour = "blue", alpha = .1) + 
-  geom_node_text(aes(label = name), size = 2, 
+  geom_node_point(colour = "black", alpha = .1, size = .5) + 
+  geom_node_text(aes(label = name), size = 1, 
                  vjust = 1, hjust = 1, 
                  check_overlap = TRUE) +
   theme(legend.position = "none") + 
   labs(title = "Network graphs of Reliefweb bigrams related to the Ukraine conflict in 2022", 
-       subtitle = "Data source: https://reliefweb.int/")
+       subtitle = "Data source: https://reliefweb.int/updates?advanced-search=%28PC241%29_%28DA20220101-20230104%29")
 
-ggsave("network_graph.png", network_graph, width = 42, height = 29.7, units = "cm", dpi = 300)
+ggsave("./plots/network_graph_kk.png", network_graph, width = 42, height = 29.7, units = "cm", dpi = 300)
   
 ```
 
