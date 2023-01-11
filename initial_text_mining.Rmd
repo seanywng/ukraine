@@ -42,6 +42,9 @@ rw <- read_csv("./data/scraped_full_20230101_20220101.csv") %>%
   mutate(date = dmy(date)) %>% 
   left_join(ukr_links, by = c("link" = "url")) %>%
   filter(link %out% to_remove) %>% 
+  group_by(link) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
   select(-link) %>% 
   mutate(theme = str_replace_all(theme, "\n", ",")) %>% 
   mutate(agriculture = ifelse(str_detect(theme, "Agriculture"), 1, 0), 
@@ -99,12 +102,12 @@ set.seed(2023)
 titles %>% 
   pairwise_count(word, id, sort = TRUE, upper = FALSE) %>%
   filter(str_detect(item1, "[a-z]") & str_detect(item2, "[a-z]")) %>%
-  filter(n >= 70) %>%
+  filter(n >= 50) %>%
   igraph::graph_from_data_frame() %>% 
-  ggraph(layout = "lgl") +
+  ggraph(layout = "fr") +
   geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "cyan4") +
   geom_node_point(size = 2) +
-  geom_node_text(aes(label = name), repel = TRUE, size = 3, 
+  geom_node_text(aes(label = name), repel = TRUE, size = 2, 
                  point.padding = unit(0.2, "lines")) +
   theme_void()
 
@@ -125,7 +128,7 @@ words <- rw %>%
   mutate(stem = wordStem(word, language = "porter")) %>% 
   filter(stem %out% c("de", "des", "la", "las", "le", "les", 
                       "en", "el", "http", "se", "ses")) %>% 
-  filter(!str_detect(word, "ukraine|ukrainian|people|humanitarian|support|including|country")) %>% 
+  filter(!str_detect(word, "ukraine|ukrainian|people|humanitarian|support|including|country|\\.")) %>% 
   mutate(stem = recode(stem, 
                        "ukraine’" = "ukrain")) %>% 
   filter(nchar(stem) < 20)
@@ -161,7 +164,7 @@ word_pairs %>%
 
 ```{r}
 tf_idf <- words %>% 
-  left_join(rw %>% select(id, source, theme), 
+  left_join(rw %>% select(id, source), 
             by = "id") %>% 
   bind_tf_idf(stem, source, n) 
 
@@ -207,11 +210,11 @@ frequency_by_source <- function(tbl, source) {
   sourcen <- quo_name(source)
   
   tbl %>% 
-    filter(source == !!source) %>% 
-    slice_max(tf, n = 20) %>% 
-    ungroup() %>% 
+    filter(source == !!source) %>%
+    arrange(desc(tf)) %>% 
+    head(20) %>%
     ggplot(aes(x = tf, 
-               y = fct_reorder(word, tf)))+
+               y = fct_reorder(word, tf, .fun = sum)))+
     geom_col(show.legend = FALSE, 
              fill = "cornflowerblue") + 
     labs(x = "Term frequency", y = "", 
@@ -220,10 +223,10 @@ frequency_by_source <- function(tbl, source) {
 
   tbl %>%
     filter(source == !!source) %>% 
-    slice_max(tf_idf, n = 20) %>% 
-    ungroup() %>% 
+    arrange(desc(tf_idf)) %>% 
+    head(20) %>%
     ggplot(aes(x = tf_idf, 
-               y = fct_reorder(word, tf_idf)))+
+               y = fct_reorder(word, tf_idf, .fun = sum)))+
     geom_col(show.legend = FALSE, 
              fill = "tomato") + 
     labs(x = "Tf-idf", y = "", 
@@ -232,10 +235,16 @@ frequency_by_source <- function(tbl, source) {
     
 }
 
-frequency_by_source(tf_idf, "EC")
+frequency_by_source(tf_idf, "ACAPS")
 
 
 ```
+
+```{r}
+rw %>% 
+  count(source, sort = TRUE)
+```
+
 
 I guess IMC really are CIA 
 
@@ -246,7 +255,7 @@ I guess IMC really are CIA
 rw %>% 
   filter(id == 
            tf_idf %>%
-           filter(source == "EC" & word == "euratom") %>%
+           filter(source == "ACAPS" & word == "slipping") %>%
            sample_n(1) %>%
            pull(id)) %>%
   pull(body)
@@ -277,12 +286,18 @@ bigrams_sep <- rw %>%
 bigram_counts <- bigrams_sep %>% count(word1, word2, sort = TRUE)
   
 bigrams <- bigrams_sep %>%
-  unite(bigram, word1, word2, sep = " ")
+  unite(bigram, word1, word2, sep = " ") %>% 
+  filter(bigram %out% c("million people", 
+                        "humanitarian assistance"))
 
 tf_idf_bigrams <- bigrams %>%
   count(id, bigram) %>% 
   bind_tf_idf(bigram, id, n) %>% 
-  arrange(desc(tf_idf))
+  arrange(desc(tf_idf)) %>% 
+  left_join(rw %>% 
+              select(id, source), 
+            by = "id") 
+  
 
 bigrams_full <- rw %>% 
   select(id, body) %>% 
@@ -294,6 +309,36 @@ bigrams_full <- rw %>%
   filter(str_detect(word1, "[a-z]") & !str_detect(word1, "<")) %>% 
   filter(str_detect(word2, "[a-z]") & !str_detect(word2, "<")) %>% 
   unite(bigram, word1, word2, sep = " ")
+
+```
+
+
+### Tf-idf 
+
+Interpretability is very high on the bigram dataset, however, only the broadest strokes are noticed. One clear example is OCHA's result. 
+
+```{r}
+
+tf_idf_bigrams %>% 
+  rename(word = bigram) %>% 
+frequency_by_source("Oxfam")
+
+
+```
+
+
+
+```{r}
+
+# Article checking function
+
+rw %>% 
+  filter(id == 
+           tf_idf_bigrams %>%
+           filter(source == "DRC" & bigram == "unemployment assistance") %>%
+           sample_n(1) %>%
+           pull(id)) %>%
+  pull(body)
 
 ```
 

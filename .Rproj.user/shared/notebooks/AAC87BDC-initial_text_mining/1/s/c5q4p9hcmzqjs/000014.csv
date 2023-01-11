@@ -1,0 +1,12 @@
+"0","rw %>% 
+  filter(id == 
+           tf_idf_bigrams %>%
+           filter(source == ""DRC"" & bigram == ""unemployment assistance"") %>%
+           sample_n(1) %>%
+           pull(id)) %>%
+  pull(body)
+"
+"1","[1]"
+"1"," ""1. New Law Provides Simplified Access to Unemployment Benefits for IDPs and Conflict-Affected Persons During Martial Law, On 6 May 2022, the President signed Law №2220-IX introducing flexible rules on a variety of unemployment assistance issues during Martial Law. Following are some of the major changes that will ease procedural burdens of IDPs and conflict-affected persons entitled to unemployment assistance:, Status of an unemployed person will be granted from the first day of registration of a person in the local office of the State Employment Service, No mandatory requirement for physical presence at local office if the persons is located in occupied territory or conflict area1 . Status can be granted based on communication made through alternative means including digital means, Similar to unemployment status, unemployment assistance will be assigned from the first day of registration, If a person does not possess the necessary labor documents, the status and benefits will be assigned on the basis of information from State Registers or tax declaration, IDPs/ persons in conflict area may terminate the employment contract by submitting an application to the any local office of the State Employment Service, The new law also prescribes that the maximum amount of unemployment assistance shall not exceed 150% of minimum salary. Unemployment assistance will not be paid if a person spent more than 30 days abroad."""
+"1","
+"

@@ -1,8 +1,0 @@
-"0","  bigrams_raw <- tbl %>% 
-    select(id, body) %>% 
-    unnest_tokens(bigram, body, token = ""ngrams"", n = 2) %>% 
-    filter(!is.na(bigram))
-"
-"2","Error in UseMethod(""select"") : 
-  no applicable method for 'select' applied to an object of class ""function""
-"

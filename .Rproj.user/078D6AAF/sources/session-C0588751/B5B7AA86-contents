@@ -22,6 +22,7 @@ library(patchwork)
 library(profvis)
 library(scales)
 library(plotly)
+library(flextable)
 
 `%out%` <- Negate(`%in%`)
 
@@ -212,6 +213,73 @@ profvis({
 ```{r}
 pcode2_shape <- st_read("./ukr_adm_sspe_20221005_em/ukr_admbnda_adm2_sspe_20221005.shp",
                         quiet = TRUE) 
+```
+
+words by source? 
+And maybe just the normal eda for a conflict dataset, nothing too detailed. 
+
+
+```{r conflict-events-summary-2021}
+acled %>%  
+  group_by(event_type) %>% 
+  summarise(Count = n()) %>% 
+  mutate(Percentage = round(Count / sum(Count) * 100, digits = 2)) %>% 
+  rename(`Event type` = event_type) %>% 
+  arrange(desc(Percentage)) %>% 
+  flextable() %>% 
+  set_caption("2021 event types by % of total") %>% 
+  theme_zebra() %>% 
+  add_footer_lines("Data source: Armed Conflict Location & Event Data Project (ACLED); acleddata.com")
+
+```
+
+
+```{r facet-line-plot-monthly,fig.height=9}
+
+acled %>% 
+  group_by(event_date, event_type) %>%  
+  summarise(count = n()) %>% 
+  ggplot(aes(x = event_date, y = count, colour = event_type, group = event_type)) + 
+  geom_smooth(se = FALSE, alpha = .5, size = .5) +
+  geom_line() +
+  facet_wrap(~ event_type, scales = "free_y", ncol = 1) + 
+   labs(x = "",
+       y = "Number of events per day", 
+       title = "Number of conflict events per day, by type",
+       subtitle = "Data source: Armed Conflict Location & Event Data Project (ACLED); acleddata.com") + 
+  theme(legend.position = "none",
+        axis.text.x = element_text(size = 7, angle = 30, hjust = 1)) + 
+  scale_x_date(date_breaks = "1 month", labels = date_format(format = "%Y-%b"))
+
+#ggsave("./misc/event_days.png", dpi = 300, height = 11, width = 14, units = "in")
+
+```
+
+
+```{r line-plot-sub-event-type-2021, fig.height=6}
+
+acled_new %>%
+  mutate(sub_event_type = fct_lump(sub_event_type, 9)) %>%
+  mutate(month = floor_date(event_date, "month")) %>% 
+  mutate(month = 
+           map(month, 
+               ~ seq.Date(as.Date(.), as.Date("2022/05/01"), 
+                          by = "month"))) %>% 
+  unnest(month) %>% 
+  group_by(month, sub_event_type) %>%
+  summarise(events = n(), .groups = "drop") %>% 
+  ggplot(aes(x = month, y = events, fill = sub_event_type, group = sub_event_type)) + 
+  geom_area()  +
+  scale_x_date(date_breaks = "1 month", labels = date_format(format = "%Y-%b")) +
+  # scale_y_continuous(labels = comma, breaks = seq(0, 22000, by = 2000)) + 
+  theme(legend.position = "top", 
+        axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1)) +
+  labs(x = "",
+       y = "Cumulative conflict events", 
+       title = "Cumulative 2021-2022 conflict events per month, by event type",
+       subtitle = "Data source: Armed Conflict Location & Event Data Project (ACLED); acleddata.com", 
+       fill = "")
+
 ```
 
 ```{r}
