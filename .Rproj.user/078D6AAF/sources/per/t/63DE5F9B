@@ -1,28 +1,27 @@
 {
-    "id": "B5B7AA86",
-    "path": "~/R/ukraine/acled_ukraine.Rmd",
-    "project_path": "acled_ukraine.Rmd",
-    "type": "r_markdown",
-    "hash": "0",
+    "id": "63DE5F9B",
+    "path": "~/R/ukraine/maybe_later.R",
+    "project_path": "maybe_later.R",
+    "type": "r_source",
+    "hash": "279745243",
     "contents": "",
     "dirty": false,
-    "created": 1673454064693.0,
+    "created": 1672878831407.0,
     "source_on_save": false,
     "relative_order": 3,
     "properties": {
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "103,16",
-        "scrollLine": "98",
-        "last_setup_crc32": ""
+        "cursorPosition": "9,0",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1673415876,
+    "lastKnownWriteTime": 1672883185,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1673415876,
+    "last_content_update": 1672883185452,
     "read_only": false,
     "read_only_alternatives": []
 }

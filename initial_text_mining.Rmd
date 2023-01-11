@@ -19,6 +19,7 @@ library(lubridate)
 library(SnowballC)
 library(magrittr)
 library(patchwork)
+library(tidylo)
 
 `%out%` <- Negate(`%in%`)
 
@@ -115,6 +116,10 @@ titles %>%
 
 
 ## Words 
+
+Reliefweb, in general, is full of fairly repetitive content.
+Text mining algorithms have uncovered a substantial amount of boilerplate. 
+This is why we examine the term frequency (the number of times a word appears in the corpus) and the term frequency-inverse document frequency (tf-idf), which balances the most common words against the words tha
 
 ```{r}
 
@@ -289,6 +294,7 @@ bigrams <- bigrams_sep %>%
   unite(bigram, word1, word2, sep = " ") %>% 
   filter(bigram %out% c("million people", 
                         "humanitarian assistance"))
+  
 
 tf_idf_bigrams <- bigrams %>%
   count(id, bigram) %>% 
@@ -296,7 +302,8 @@ tf_idf_bigrams <- bigrams %>%
   arrange(desc(tf_idf)) %>% 
   left_join(rw %>% 
               select(id, source), 
-            by = "id") 
+            by = "id") %>% 
+  bind_log_odds(bigram, id, n)
   
 
 bigrams_full <- rw %>% 
@@ -319,14 +326,45 @@ Interpretability is very high on the bigram dataset, however, only the broadest 
 
 ```{r}
 
+bigram_frequency_by_source <- function(tbl, source) {
+  
+  source <- enquo(source)
+  sourcen <- quo_name(source)
+  
+  tbl %>% 
+    filter(source == !!source) %>%
+    filter(!is.infinite(log_odds_weighted)) %>% 
+    arrange(desc(log_odds_weighted)) %>% 
+    head(20) %>%
+    ggplot(aes(x = log_odds_weighted, 
+               y = fct_reorder(word, log_odds_weighted, .fun = sum)))+
+    geom_col(show.legend = FALSE, 
+             fill = "cornflowerblue") + 
+    labs(x = "Log odds", y = "", 
+         title = paste0("Log odds -- ", sourcen), 
+         subtitle = "2022-01-01 to 2023-01-01") + 
+
+  tbl %>%
+    filter(source == !!source) %>% 
+    
+    arrange(desc(tf_idf)) %>% 
+    head(20) %>%
+    ggplot(aes(x = tf_idf, 
+               y = fct_reorder(word, tf_idf, .fun = sum)))+
+    geom_col(show.legend = FALSE, 
+             fill = "tomato") + 
+    labs(x = "Tf-idf", y = "", 
+         title = paste0("Tf-idf -- ", sourcen), 
+         subtitle = "2022-01-01 to 2023-01-01") 
+    
+}
+
 tf_idf_bigrams %>% 
   rename(word = bigram) %>% 
-frequency_by_source("Oxfam")
+bigram_frequency_by_source("USAID")
 
 
 ```
-
-
 
 ```{r}
 
@@ -335,10 +373,19 @@ frequency_by_source("Oxfam")
 rw %>% 
   filter(id == 
            tf_idf_bigrams %>%
-           filter(source == "DRC" & bigram == "unemployment assistance") %>%
+           filter(source == "USAID" & bigram == "bakhmut city") %>%
            sample_n(1) %>%
            pull(id)) %>%
-  pull(body)
+  pull(body, date)
+
+rw %>% 
+  filter(id == 
+           tf_idf %>%
+           filter(word == "gou") %>%
+           sample_n(1) %>%
+           pull(id)) %>%
+  # Is this a fluke? How am I able to pull two columns?
+  pull(body, source)
 
 ```
 

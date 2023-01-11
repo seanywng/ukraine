@@ -1,0 +1,14 @@
+"0","rw %>% 
+  filter(id == 
+           tf_idf %>%
+           filter(word == ""gou"") %>%
+           sample_n(1) %>%
+           pull(id)) %>%
+  pull(body, source)
+"
+"1","                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           USAID "
+"1","
+"
+"1","""SITUATION AT A GLANCE, 6,655 Civilian Deaths Resulting From the Conflict\nOHCHR – November 2022, 7.9 MILLION Refugees From Ukraine Recorded Across Europe\nUNHCR – November 2022, 6.5 MILLION People Internally Displaced Across Ukraine\nIOM – October 2022, 17.7 MILLION People in Need of Humanitarian Assistance in Ukraine\nUN – November 2022, 13.5 MILLION People Reached With Humanitarian Assistance in Ukraine\nOCHA – October 2022, GoRF forces continue to target critical infrastructure and civilian population centers across Ukraine with waves of aerial attacks, generating civilian casualties and causing widespread electrical, water, and heating shortages., Humanitarian agencies are working to deliver emergency assistance to Kherson city and other recently retaken areas of Kherson Oblast. However, insecurity, utility shortages, and lack of health services continue to affect civilians in the areas. In response, the GoU is facilitating evacuations to cities west of Kherson., USAID/BHA announces $20 million in new funding to WFP in support of the “Grain From Ukraine” initiative."" "
+"1","
+"
