@@ -1,0 +1,7 @@
+memory profiling: GC profiling: line profiling: sample.interval=10000
+:4345206:8963286:241298736:0:"hook" "Rprof" "profvis::profvis" 
+:4360533:8976396:248437280:3941:".External2" "profvis::profvis" 
+:4376053:8995816:254168880:3032:"lapply" ".make_numeric_version" "package_version" "<Anonymous>" "callFun" "<Anonymous>" "get_data" "detect_new" "rstudio$detect" "rstudio_detect" "rstudio_stdout" "cli_output_connection" "get_real_output" "cli::num_ansi_colors" "has_ansi" "new_quo_deparser" "expr_deparse" "as_label_infix" "FUN" "vapply" ".rlang_purrr_map_mold" "map_chr" "exprs_auto_name" "rlang:::quos_auto_name" "profvis::profvis" 
+:4394077:9015308:261636536:4036:"gsub" "strip_style" "has_overflown" "line_push" "method" "self$push_one" "method" "lines$push" "deparser" "sexp_deparse" "deparser" "method" "lines$deparse" "args_deparse" "deparser" "sexp_deparse" "deparser" "method" "lines$deparse" "operand_deparse" "binary_op_deparse" "deparser" "op_deparse" "deparser" "sexp_deparse" "deparser" "method" "lines$deparse" "operand_deparse" "binary_op_deparse" "deparser" "op_deparse" "deparser" "sexp_deparse" "quo_deparse" "expr_deparse" "as_label_infix" "FUN" "vapply" ".rlang_purrr_map_mold" "map_chr" "exprs_auto_name" "rlang:::quos_auto_name" "profvis::profvis" 
+:4411100:9042527:267780296:3226:"utils:::readCitationFile" 
+:4427851:9953018:273305200:2784:"==" "profvis::profvis" 

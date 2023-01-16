@@ -1,47 +1,34 @@
-"0",""
-"0","ukr_links <- read_csv(""./data/reliefweb_ukr_links.csv"") %>% "
-"0","  rename(url = value) %>% "
-"0","  mutate(id = row_number())"
-"0",""
-"0","# This is the list of Spanish and French links "
-"0","to_remove <- read_csv(""./data/links_to_remove.csv"") %>% "
-"0","  rename(url = value) %>% "
-"0","  pull(url)"
-"0",""
-"0","rw <- read_csv(""./data/scraped_full_20230101_20220101.csv"") %>% "
-"0","  mutate(date = dmy(date)) %>% "
-"0","  left_join(ukr_links, by = c(""link"" = ""url"")) %>%"
-"0","  filter(link %out% to_remove) %>% "
-"0","  group_by(link) %>% "
-"0","  slice(1) %>% "
-"0","  ungroup() %>% "
-"0","  select(-link) %>% "
-"0","  mutate(theme = str_replace_all(theme, ""\n"", "","")) %>% "
-"0","  mutate(agriculture = ifelse(str_detect(theme, ""Agriculture""), 1, 0), "
-"0","         cccm = ifelse(str_detect(theme, ""Camp Coordination and Camp Management""), 1, 0),"
-"0","         cca = ifelse(str_detect(theme, ""Climate Change and Environment""), 1, 0),"
-"0","         contributions = ifelse(str_detect(theme, ""Contributions""), 1, 0),"
-"0","         coordination = ifelse(str_detect(theme, ""Coordination""), 1, 0),"
-"0","         disaster_management = ifelse(str_detect(theme, ""Disaster Management""), 1, 0),"
-"0","         education = ifelse(str_detect(theme, ""Education""), 1, 0),"
-"0","         food_nutrition = ifelse(str_detect(theme, ""Food and Nutrition""), 1, 0),"
-"0","         gender = ifelse(str_detect(theme, ""Gender""), 1, 0),"
-"0","         health = ifelse(str_detect(theme, ""Health""), 1, 0),"
-"0","         hiv_aids = ifelse(str_detect(theme, ""HIV/Aids""), 1, 0),"
-"0","         financing = ifelse(str_detect(theme, ""Humanitarian Financing""), 1, 0),"
-"0","         logs_telecoms = ifelse(str_detect(theme, ""Logistics and Telecommunications""), 1, 0),"
-"0","         mine_action = ifelse(str_detect(theme, ""Mine Action""), 1, 0),"
-"0","         peacebuiling = ifelse(str_detect(theme, ""Peacekeeping and Peacebuilding""), 1, 0),"
-"0","         protection_human_rights = ifelse(str_detect(theme, ""Protection and Human Rights""), 1, 0),"
-"0","         recovery = ifelse(str_detect(theme, ""Recovery and Reconstruction""), 1, 0), "
-"0","         security = ifelse(str_detect(theme, ""Safety and Security""), 1, 0),"
-"0","         shelter_nfi = ifelse(str_detect(theme, ""Shelter and Non-Food Items""), 1, 0),"
-"0","         wash = ifelse(str_detect(theme, ""Water Sanitation Hygiene""), 1, 0))"
-"0",""
-"0","# I don't think this is necessary anymore, I'm just going to treat this like "
-"0","# genres in an IMDB scrape "
-"0","# rw_dup <- rw %>% "
-"0","#   separate_rows(theme, "
-"0","#            sep = ""\n"")"
-"0",""
-"0",""
+"0","rw <- read_csv(""./data/scraped_full_20230101_20220101.csv"") %>% 
+  mutate(date = dmy(date), 
+         month = month(date)) %>% 
+  left_join(ukr_links, by = c(""link"" = ""url"")) %>%
+  filter(link %out% to_remove) %>% 
+  mutate(theme = str_replace_all(theme, ""\n"", "","")) %>% 
+  mutate(agriculture = ifelse(str_detect(theme, ""Agriculture""), 1, 0), 
+         cccm = ifelse(str_detect(theme, ""Camp Coordination and Camp Management""), 1, 0),
+         cca = ifelse(str_detect(theme, ""Climate Change and Environment""), 1, 0),
+         contributions = ifelse(str_detect(theme, ""Contributions""), 1, 0),
+         coordination = ifelse(str_detect(theme, ""Coordination""), 1, 0),
+         disaster_management = ifelse(str_detect(theme, ""Disaster Management""), 1, 0),
+         education = ifelse(str_detect(theme, ""Education""), 1, 0),
+         food_nutrition = ifelse(str_detect(theme, ""Food and Nutrition""), 1, 0),
+         gender = ifelse(str_detect(theme, ""Gender""), 1, 0),
+         health = ifelse(str_detect(theme, ""Health""), 1, 0),
+         hiv_aids = ifelse(str_detect(theme, ""HIV/Aids""), 1, 0),
+         financing = ifelse(str_detect(theme, ""Humanitarian Financing""), 1, 0),
+         logs_telecoms = ifelse(str_detect(theme, ""Logistics and Telecommunications""), 1, 0),
+         mine_action = ifelse(str_detect(theme, ""Mine Action""), 1, 0),
+         peacebuiling = ifelse(str_detect(theme, ""Peacekeeping and Peacebuilding""), 1, 0),
+         protection_human_rights = ifelse(str_detect(theme, ""Protection and Human Rights""), 1, 0),
+         recovery = ifelse(str_detect(theme, ""Recovery and Reconstruction""), 1, 0), 
+         security = ifelse(str_detect(theme, ""Safety and Security""), 1, 0),
+         shelter_nfi = ifelse(str_detect(theme, ""Shelter and Non-Food Items""), 1, 0),
+         wash = ifelse(str_detect(theme, ""Water Sanitation Hygiene""), 1, 0))  
+"
+"2","[1mRows: [22m[34m4218[39m [1mColumns: [22m[34m7[39m"
+"2","[36m--[39m [1mColumn specification[22m [36m------------------------------------------------------------------[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (7): title, type, source, theme, date, body, link"
+"2","
+[36mi[39m Use `spec()` to retrieve the full column specification for this data.
+[36mi[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."

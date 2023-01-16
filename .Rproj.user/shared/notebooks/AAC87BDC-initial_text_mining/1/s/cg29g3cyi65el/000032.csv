@@ -1,0 +1,15 @@
+"0","# Stronger checking function, which will always work, unlike the one above
+rw %>% 
+  filter(id == 
+           bigrams_month %>%
+           filter(month == 8 & bigram  == ""operationally feasible"") %>%
+           sample_n(1) %>%
+           pull(id)) %>%
+  # Is this a fluke? How am I able to pull two columns?
+  pull(body, source) %>% 
+  profvis::profvis({.})
+"
+"2","Warning: the condition has length > 1 and only the first element will be used"
+"2","Error in attr(expr_q, ""srcfile"") <- `*vtmp*` : 
+  cannot set attribute on a symbol
+"

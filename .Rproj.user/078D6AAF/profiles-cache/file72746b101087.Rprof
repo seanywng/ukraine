@@ -1,0 +1,5 @@
+memory profiling: GC profiling: line profiling: sample.interval=10000
+:4200291:11607265:231887488:0:"Rprof" "profvis" 
+:4219314:11633525:237014344:2349:"sexp_deparse" "deparser" "method" "lines$deparse" "deparser" "sexp_deparse" "deparser" "method" "lines$deparse" "operand_deparse" "binary_op_deparse" "deparser" "op_deparse" "deparser" "sexp_deparse" "quo_deparse" "expr_deparse" "infix_overflows" "FUN" "vapply" ".rlang_purrr_map_mold" "map_chr" "exprs_auto_name" "rlang:::quos_auto_name" "profvis" 
+:4222580:11640216:238953288:1164:"stri_detect_regex" "str_detect" "profvis" 
+:4222580:11642296:238953344:0:"stri_detect_regex" "str_detect" "profvis" 

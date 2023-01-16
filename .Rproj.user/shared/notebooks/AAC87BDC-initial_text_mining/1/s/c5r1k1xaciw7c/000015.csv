@@ -1,0 +1,12 @@
+"0","ukr_links %>% 
+  filter(id == rw %>% 
+           filter(str_detect(body, ""Izium"") & 
+                    str_detect(body, ""boys"")) %>% 
+           sample_n(1) %>% 
+           pull(id)) %>%
+  pull(url)
+"
+"1","[1]"
+"1"," ""https://reliefweb.int/report/ukraine/ukraine-civilian-casualties-2400-14-june-2022-enruuk"""
+"1","
+"
