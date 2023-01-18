@@ -1,0 +1,7 @@
+"0"," ggsave(plot = bigram_patchwork,
+         filename = paste0(""./plots/bigram_months_bar.png""),
+         device = ""png"",
+         dpi = 300, height = 11, width = 14, units = ""in"")
+"
+"2","Error in plot_theme(plot) : object 'bigram_patchwork' not found
+"

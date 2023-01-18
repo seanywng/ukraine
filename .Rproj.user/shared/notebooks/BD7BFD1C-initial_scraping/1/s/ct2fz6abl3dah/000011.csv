@@ -1,0 +1,94 @@
+"0","mmr_scraped <- mmr_links %>% 
+  map_df(., possibly(scrape_page, character(0), quiet = FALSE))
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Warning in environment(x) <- target_env :"
+"2","
+ "
+"2"," closing unused connection 8 (https://reliefweb.int/report/myanmar/dooplaya-district-interview-sac-air-strikes-damaged-buildings-thay-baw-boh-village-kaw-tree-township-may-2022)
+"
+"2","Warning in environment(x) <- target_env :"
+"2","
+ "
+"2"," closing unused connection 7 (https://reliefweb.int/report/myanmar/taw-oo-district-situation-update-fighting-displacement-killing-and-villagers-livelihoods-htaw-ta-htoo-township-april-july-2022)
+"
+"2","Warning in environment(x) <- target_env :"
+"2","
+ "
+"2"," closing unused connection 6 (https://reliefweb.int/report/myanmar/human-not-shield-attack-civilians-bilin-township-doo-tha-htoo-district-april-22nd-may-22nd-2022)
+"
+"2","Warning in environment(x) <- target_env :"
+"2","
+ "
+"2"," closing unused connection 5 (https://reliefweb.int/map/myanmar/myanmar-idp-sites-shan-state-30-november-2022)
+"
+"2","Warning in environment(x) <- target_env :"
+"2","
+ "
+"2"," closing unused connection 4 (https://reliefweb.int/map/myanmar/myanmar-idp-sites-kachin-state-30-november-2022)
+"
+"2","Warning in environment(x) <- target_env :"
+"2","
+ "
+"2"," closing unused connection 3 (https://reliefweb.int/map/myanmar/myanmar-idp-sites-kachin-and-northern-shan-states-30-november-2022)
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Error: HTTP error 502.
+"
+"2","Warning in for (name in names(public_methods)) lockBinding(name, public_bind_env) :"
+"2","
+ "
+"2"," closing unused connection 8 (https://reliefweb.int/report/myanmar/kler-lwee-htoo-district-incident-report-two-villagers-shot-dead-and-12-villagers-houses-burned-down-sac-ler-doh-township-july-2022)
+"
+"2","Warning in for (name in names(public_methods)) lockBinding(name, public_bind_env) :"
+"2","
+ "
+"2"," closing unused connection 7 (https://reliefweb.int/report/myanmar/myanmar-un-security-council-resolution-small-important-step-addressing-human-rights-crisis)
+"
+"2","Warning in for (name in names(public_methods)) lockBinding(name, public_bind_env) :"
+"2","
+ "
+"2"," closing unused connection 6 (https://reliefweb.int/report/myanmar/cccm-shelter-nfi-cluster-analysis-report-car-kachin-nss-myanmar-30-november-2022)
+"
+"2","Warning in for (name in names(public_methods)) lockBinding(name, public_bind_env) :"
+"2","
+ "
+"2"," closing unused connection 5 (https://reliefweb.int/report/myanmar/myanmar-action-needed-stop-carnage-says-un-expert-after-adoption-security-council-resolution)
+"
+"2","Warning in for (name in names(public_methods)) lockBinding(name, public_bind_env) :"
+"2","
+ "
+"2"," closing unused connection 4 (https://reliefweb.int/report/myanmar/myanmar-quarter-three-humanitarian-operational-presence-30-september-2022)
+"
+"2","Warning in for (name in names(public_methods)) lockBinding(name, public_bind_env) :"
+"2","
+ "
+"2"," closing unused connection 3 (https://reliefweb.int/report/myanmar/un-security-council-historic-censure-myanmar-junta)
+"
+"1","[1m[33mError[39m in `dplyr::bind_rows()`:[22m
+[38;5;238m[33m![38;5;238m Argument 8 must have names.[39m
+Backtrace:
+[90m 1. [39mmmr_links %>% ...
+[90m 2. [39m[1mpurrr[22m::map_df(., possibly(scrape_page, character(0), quiet = FALSE))
+[90m 3. [39m[1m[94mdplyr::bind_rows([39m[22mres, .id = .id[1m[94m)[39m[22m
+"

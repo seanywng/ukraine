@@ -1,0 +1,61 @@
+"0","a_scraped <- a %>% 
+  map_df(., possibly(scrape_page, character(0), quiet = FALSE))
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Could not resolve host: reliefweb.int
+"
+"2","Error: Terminated by user
+"

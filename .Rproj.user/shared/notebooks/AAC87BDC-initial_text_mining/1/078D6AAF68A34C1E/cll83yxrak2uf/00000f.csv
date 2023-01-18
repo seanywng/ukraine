@@ -1,0 +1,8 @@
+"0","rw_sector <- read_csv(""./data/scraped_full_20230101_20220101.csv"") %>% 
+  mutate(date = dmy(date), 
+         month = month(date)) %>% 
+  left_join(ukr_links, by = c(""link"" = ""url"")) %>%
+  filter(link %out% to_remove)
+"
+"2","Error in is.data.frame(y) : object 'ukr_links' not found
+"

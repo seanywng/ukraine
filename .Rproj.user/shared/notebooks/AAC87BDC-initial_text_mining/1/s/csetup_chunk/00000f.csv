@@ -17,5 +17,7 @@
 "0",""
 "0","`%out%` <- Negate(`%in%`)"
 "0",""
+"0","range_wna <- function(x){(x-min(x, na.rm = TRUE))/(max(x, na.rm = TRUE)-min(x, na.rm = TRUE))}"
+"0",""
 "0","theme_set(theme_light())"
 "0",""
