@@ -1,0 +1,10 @@
+"0","# Throws an error, but still works 
+# This error occurs when you ask R to overwrite an existing file 
+tf_idf_alt %>% 
+  filter(source %in% more_than_5) %>% 
+  nest(-source) %$%
+  walk2(data, source, save_words)
+"
+"2","Error in png_dev(..., res = dpi, units = ""in"") : 
+  unable to start png() device
+"

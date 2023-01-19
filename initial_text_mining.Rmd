@@ -143,28 +143,11 @@ Furthermore, if one examines the ACLED entries, one notes that
 
 ```{r}
 
-words_source <- rw %>% 
+words <- rw %>% 
   select(id, source, body) %>% 
-  filter(source %out% c("ACLED", "OSCE", "IAEA")) %>% 
+  # filter(source %out% c("ACLED", "OSCE", "IAEA")) %>% 
   unnest_tokens(word, body) %>% 
-  mutate(word = str_remove_all(word, " \\'s")) %>%
-  count(source, word, sort = TRUE) %>% 
-  anti_join(stop_words, by = "word") %>% 
-  filter(str_detect(word, "[a-z]")) %>%
-  filter(!str_detect(word, "\\.(com|org|edu|gov)")) %>% 
-  mutate(stem = wordStem(word, language = "porter")) %>% 
-  filter(stem %out% c("de", "des", "la", "las", "le", "les", 
-                      "en", "el", "http", "se", "ses")) %>% 
-  # filter(!str_detect(word, "ukraine|ukrainian|people|humanitarian|support|including|country|\\.")) %>% 
-  # mutate(stem = recode(stem, 
-  #                      "ukraine’" = "ukrain")) %>% 
-  filter(nchar(stem) < 20)
-
-words_id <- rw %>% 
-  select(id, source, body) %>% 
-  filter(source %out% c("ACLED", "OSCE", "IAEA")) %>% 
-  unnest_tokens(word, body) %>% 
-  mutate(word = str_remove_all(word, " \\'s")) %>%
+  # mutate(word = str_remove_all(word, " \\'s")) %>%
   count(id, word, sort = TRUE) %>% 
   anti_join(stop_words, by = "word") %>% 
   filter(str_detect(word, "[a-z]")) %>%
@@ -175,7 +158,14 @@ words_id <- rw %>%
   # filter(!str_detect(word, "ukraine|ukrainian|people|humanitarian|support|including|country|\\.")) %>% 
   # mutate(stem = recode(stem, 
   #                      "ukraine’" = "ukrain")) %>% 
-  filter(nchar(stem) < 20)
+  filter(nchar(stem) < 20) 
+
+words %>% 
+  left_join(rw %>% 
+              select(id, source), by = "id") %>% 
+  count(source, word) %>% 
+  add_count(word, wt = n, name = "word_total")
+  
 
 
 ```
@@ -196,17 +186,17 @@ words_to_remove <- c("ukraine", "ukranian", "ukrainian", "humanitarian", "suppor
 # Be aware that word_pairs as it is will return a df of 111 million rows 
 # Consider setting a better threshold
 word_pairs <- words %>%
-  filter(word %out% words_to_remove) %>% 
+  # filter(word %out% words_to_remove) %>% 
   pairwise_count(word, source, sort = TRUE, upper = FALSE) %>% 
   filter(str_detect(item1, "[a-z]") & str_detect(item2, "[a-z]")) %>% 
   filter(n > 100)
 
 
-word_pair_network_graph <- words_id %>%
+word_pair_network_graph <- words %>%
   # filter(word %out% words_to_remove) %>% 
   pairwise_count(word, id, sort = TRUE, upper = FALSE) %>%
   filter(str_detect(item1, "[a-z]") & str_detect(item2, "[a-z]")) %>%
-  # Start at 500, remember how many pairs ther are 
+  # Start at 500, remember how many pairs there are 
   filter(n > 500) %>% 
   igraph::graph_from_data_frame() %>% 
   ggraph(layout = "stress") +
@@ -225,7 +215,7 @@ word_pair_network_graph <- words_id %>%
   
 
 ggsave(word_pair_network_graph, 
-       filename = "./plots/word_pair_network_graph.png",
+       filename = "./plots/word_pair_network_graph2.png",
        dpi = 400, width = 16.5, height = 11.7, units = "in") 
 
 word_pairs %>% 
@@ -244,18 +234,30 @@ The interpretabilty at the bigram level is just much better
 Stop polluting your environment
 
 ```{r}
+tf_idf_words <- words_source %>% 
+  bind_tf_idf(source, word, n) %>% 
+  bind_log_odds(source, word, n) %>% 
+  arrange(desc(tf_idf)) 
+  filter(word_total > 2)
+
+
+```
+
+
+```{r}
 tf_idf_words <- words_id %>% 
   bind_tf_idf(word, id, n) %>% 
   bind_log_odds(word, id, n) %>% 
   arrange(desc(tf_idf)) %>% 
   left_join(rw %>% select(id, source), 
-            by = "id") 
- 
-  filter(n > 2)
+            by = "id") %>%  
+  # n > 1 gives the most interpretable results, 
+  # though bigrams are still more useful by far
+  filter(n > 1)
 
 
-tf_idf_words %>% 
-  ggplot(aes(x = n)) + 
+tf_idf_alt %>% 
+  ggplot(aes(x = word_total)) + 
   geom_histogram() + 
   scale_x_log10() + 
   scale_y_log10() + 
@@ -370,7 +372,7 @@ save_words <- function(df, filename) {
   
   ## SET the correct directory
   ggsave(plot = word_patchwork,
-         filename = paste0("./plots/word_source_distinct/",filename, ".png"),
+         filename = paste0("./plots/word_source_filter1/",filename, ".png"),
          device = "png",
          dpi = 300, height = 11, width = 14, units = "in")
   
@@ -392,7 +394,7 @@ try .fun = mean to see what happens
 ```{r}
 # Throws an error, but still works 
 # This error occurs when you ask R to overwrite an existing file 
-tf_idf_words %>% 
+tf_idf_alt %>% 
   filter(source %in% more_than_5) %>% 
   nest(-source) %$%
   walk2(data, source, save_words)
@@ -447,7 +449,7 @@ bigrams <- rw %>%
   filter(!word2 %in% stop_words$word & (nchar(word2) < 20)) %>% 
   filter(str_detect(word1, "[a-z]") & !str_detect(word1, "<")) %>% 
   filter(str_detect(word2, "[a-z]") & !str_detect(word2, "<")) %>% 
-  filter(!str_detect(word, "\\.(com|org|edu|gov)") & 
+  filter(!str_detect(word1, "\\.(com|org|edu|gov)") & 
            !str_detect(word2, "\\.(com|org|edu|gov)")) %>% 
   unite(bigram, word1, word2, sep = " ")
   
@@ -485,16 +487,42 @@ tf_idf_bigrams <- bigrams %>%
   filter(bigram %out% c("million people", "humanitarian assistance")) %>% 
   rename(word = bigram)  
   filter(n > 1)
-  
-tf_idf_bigrams %>% 
-  ggplot(aes(x = n)) + 
+
+# Cut-off point checker
+tf_idf_bigrams_odds %>% 
+  ggplot(aes(x = word_total)) + 
   geom_histogram() + 
   scale_x_log10() + 
   scale_y_log10() + 
   geom_vline(xintercept = 2, lty = 2, colour = "red") + 
   geom_vline(xintercept = 3, lty = 2, colour = "orange") + 
   labs(title = "Possible cut-off points for bigrams")
+
+
 ```
+
+I find it very puzzling that this dataset should end up like this. I fail to understand why the bigram  
+
+```{r}
+tf_idf_bigrams_odds <- bigrams %>% 
+  count(source, bigram) %>% 
+  bind_tf_idf(bigram, source, n) %>% 
+  bind_log_odds(bigram, source, n) %>% 
+  arrange(desc(tf_idf)) %>% 
+  rename(word = bigram) %>% 
+  add_count(word, wt = n, name = "word_total") %>% 
+  group_by(source) %>% 
+  mutate(max_log_odds_weighted = 
+           max(log_odds_weighted[!is.infinite(log_odds_weighted)], na.rm = TRUE)) %>% 
+  mutate(log_odds_weighted = ifelse(is.infinite(log_odds_weighted), 
+                                    max(max_log_odds_weighted), 
+                                    log_odds_weighted)) %>% 
+  ungroup() %>% 
+  filter(n > 1) %>% 
+  left_join(bigrams %>% select(source, word = bigram, id), 
+            by = c("source" = "source", "word" = "word"))
+```
+
 
 ### Months 
 
@@ -603,7 +631,7 @@ save_bigrams <- function(df, filename) {
     arrange(desc(tf)) %>% 
     head(20) %>% 
     ggplot(aes(x = tf, 
-               y = fct_reorder(word, tf, .fun = sum)))+
+               y = fct_reorder(word, tf, .fun = mean)))+
     geom_col(show.legend = FALSE, 
              fill = "cornflowerblue") + 
     labs(x = "Term frequency", y = "", 
@@ -617,7 +645,7 @@ save_bigrams <- function(df, filename) {
     arrange(desc(tf_idf)) %>% 
     head(20) %>%
     ggplot(aes(x = tf_idf, 
-               y = fct_reorder(word, tf_idf, .fun = sum)))+
+               y = fct_reorder(word, tf_idf, .fun = mean)))+
     geom_col(show.legend = FALSE, 
              fill = "tomato") + 
     labs(x = "Tf-idf", y = "", 
@@ -632,7 +660,7 @@ save_bigrams <- function(df, filename) {
     arrange(desc(log_odds_weighted)) %>% 
     head(20) %>%
     ggplot(aes(x = log_odds_weighted, 
-               y = fct_reorder(word, log_odds_weighted, .fun = sum)))+
+               y = fct_reorder(word, log_odds_weighted, .fun = mean)))+
     geom_col(show.legend = FALSE, 
              fill = "forestgreen") + 
     labs(x = "Log odds", y = "", 
@@ -640,7 +668,7 @@ save_bigrams <- function(df, filename) {
          subtitle = "2022-01-01 to 2023-01-01")
   
   ggsave(plot = bigram_patchwork,
-         filename = paste0("./plots/bigram_source_filter1/",filename, ".png"),
+         filename = paste0("./plots/bigram_source_odds/",filename, ".png"),
          device = "png",
          dpi = 300, height = 11, width = 14, units = "in")
   
@@ -658,7 +686,7 @@ more_than_5 <- rw %>%
 ```{r}
 # Throws an error, but still works 
 # This error occurs when you ask R to overwrite an existing file 
-tf_idf_bigrams %>% 
+tf_idf_bigrams_source %>% 
   filter(source %in% more_than_5) %>% 
   nest(-source) %$%
   walk2(data, source, save_bigrams)
@@ -668,26 +696,47 @@ tf_idf_bigrams %>%
 
 Congratulations for cheating hahahahhaa and figuring out an easy way to do this 
 
+
+```{r}
+tf_idf_bigrams_odds %>%
+    filter(source %in% more_than_5) %>%
+  add_count(word, wt = n, name = "word_total") %>% 
+  filter(word_total > 5) %>% 
+    filter(!is.infinite(log_odds_weighted)) %>%
+    distinct(source, word, .keep_all = TRUE) %>%  
+  ungroup()
+  top_n(1)
+    slice_max(log_odds_weighted, n = 10) %>%
+    distinct(id, word, .keep_all = TRUE) %>% 
+    ungroup()
+```
+
+
 ```{r}
 
 rbind(
-  tf_idf_bigrams %>%
+  # Pay attention to the first one since the log-odds filtering is
+  # so finnicky
+  tf_idf_bigrams_odds %>%
     filter(source %in% more_than_5) %>%
+    add_count(word, wt = n, name = "word_total") %>%
+    filter(word_total > 10) %>%
     filter(!is.infinite(log_odds_weighted)) %>%
-    group_by(source) %>%
-    slice_max(log_odds_weighted, n = 50) %>%
+    distinct(source, word, .keep_all = TRUE) %>%
+    group_by(source) %>% 
+    slice_max(log_odds_weighted, n = 10) %>% 
     ungroup(),
   
-  tf_idf_bigrams %>%
+  tf_idf_bigrams_odds %>%
     filter(source %in% more_than_5) %>%
     group_by(source) %>%
-    slice_max(tf, n = 50) %>%
+    slice_max(tf, n = 20) %>%
     ungroup(),
   
-  tf_idf_bigrams %>%
+  tf_idf_bigrams_odds %>%
     filter(source %in% more_than_5) %>%
     group_by(source) %>%
-    slice_max(tf_idf, n = 50) %>%
+    slice_max(tf_idf, n = 20) %>%
     ungroup()
   
 ) %>%
@@ -695,9 +744,9 @@ rbind(
               select(id, link, body), 
             by = "id") %>%  
   mutate(body = str_sub(body, 1, 150)) %>% 
-  distinct(word, id, count = n, source, tf_idf, .keep_all = TRUE) %>%  
-  arrange(desc(count), desc(tf_idf)) %>% 
-  select(source, bigram = word, count, `text (1st 150 char)` = body, link, -tf_idf) %>%  
+  distinct(word, id, source, tf_idf, .keep_all = TRUE) %>%  
+  arrange(desc(n), desc(tf_idf)) %>% 
+  select(source, bigram = word, count = n, `text (1st 150 char)` = body, link, -tf_idf) %>%  
   datatable(filter = list(position = "top", clear = TRUE), 
             options = list(pageLength = 10, 
                            scrollX = TRUE,
@@ -727,7 +776,7 @@ rbind(
 who's related with programme quality
 who's just in and out maybe it'll be useful
 
-#### Remember
+### Source notes
 So, I think, for the best results, you should separate the sources into two categories, one with many 
 
 
@@ -803,6 +852,93 @@ Next we just need to find agencies that are adaptive and accountable,
 
 > A cheat search engine function -- it's an html that just has one DT per source, and all 
 > Or... a 
+
+```{r}
+
+create_bigrams <- function(df, filename) {
+  
+  filename <- enquo(filename)
+  filenamen <- quo_name(filename)
+  
+  df %>% 
+    filter(source == !!filename) %>% 
+    group_by(word) %>% 
+    slice_max(tf, n = 1) %>% 
+    ungroup() %>% 
+    arrange(desc(tf)) %>% 
+    head(20) %>% 
+    ggplot(aes(x = tf, 
+               y = fct_reorder(word, tf, .fun = mean)))+
+    geom_col(show.legend = FALSE, 
+             fill = "cornflowerblue") + 
+    labs(x = "Term frequency", y = "", 
+         title = paste0("Term frequency: ", filenamen), 
+         subtitle = "2022-01-01 to 2023-01-01") + 
+
+  df %>%
+    filter(source == !!filename) %>% 
+    group_by(word) %>% 
+    slice_max(tf_idf, n = 1) %>% 
+    ungroup() %>% 
+    arrange(desc(tf_idf)) %>% 
+    head(20) %>%
+    ggplot(aes(x = tf_idf, 
+               y = fct_reorder(word, tf_idf, .fun = mean)))+
+    geom_col(show.legend = FALSE, 
+             fill = "tomato") + 
+    labs(x = "Tf-idf", y = "", 
+         title = paste0("Tf-idf: ", filenamen), 
+         subtitle = "2022-01-01 to 2023-01-01") +
+  
+  df %>% 
+    filter(source == !!filename) %>% 
+    filter(!is.infinite(log_odds_weighted)) %>% 
+    group_by(word) %>% 
+    slice_max(log_odds_weighted, n = 1) %>% 
+    ungroup() %>% 
+    arrange(desc(log_odds_weighted)) %>% 
+    head(20) %>%
+    ggplot(aes(x = log_odds_weighted, 
+               y = fct_reorder(word, log_odds_weighted, .fun = mean)))+
+    geom_col(show.legend = FALSE, 
+             fill = "forestgreen") + 
+    labs(x = "Log odds", y = "", 
+         title = paste0("Log odds: ", filenamen), 
+         subtitle = "2022-01-01 to 2023-01-01")
+  }
+```
+
+
+```{r}
+tf_idf_bigrams_odds %>% 
+  create_bigrams("CCCM Cluster") 
+
+tf_idf_bigrams_odds %>% 
+  filter(source == "CCCM Cluster") %>% 
+  arrange(desc(log_odds_weighted), desc(word_total))
+```
+
+Maybe Health Cluster is a better example to start with,
+
+The high-ranking tf and tf-idf bigrams in CCCM point very clearly towards "collective sites" and "communal settings", furthermore, when examining the list of log-odds terms, we see many ties for first place, indicating that the CCCM corpus is full of terms very rarely used by other actors. It is hoped that by drilling down, we will see the contents and details of what CCCM is saying when they mention "css reported", "site monitoring" and "reportedly received". It appears that there is a richness here rare in other the other actors that submitted articles to reliefweb. 
+
+![](./plots/bigram_source_odds/CCCM Cluster.png)
+
+
+In contrast, we see Christian Aid, which is, in my opinion, one of the last sources I would look to for relevant data. We can see that their tf and tf-idf are dominated by "Crown Agents". Looking at their log-odds, we see mentions of "community shelter", but the real meat of their corpus can be inferred from "uk public", "committee dec", "british public" and "donating money". Perhaps if I were more interested in aid priorities. 
+
+![](./plots/bigram_source_odds/Christian Aid.png)
+
+Another good example of an actor with a varied vocabulary, without much boilerplate, is the Health Cluster. Analytics, a focus on data and even mentions of coverage -- this is a cluster that cares about quality, at least on paper. 
+
+![](./plots/bigram_source_odds/Health Cluster.png)
+
+The Ukrainian government documents within reliefweb are likely not representative of the Ukrainian government's priorities. Or are we to understand that the Ukrainian government prefers humanitarian actors to intervene in the education cluster.
+
+![](./plots/bigram_source_odds/Govt. Ukraine.png)
+
+ 
+
 
 
 

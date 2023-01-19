@@ -1,0 +1,8 @@
+"0","tf_idf_words <- words %>% 
+  bind_tf_idf(source, word, n) %>% 
+  bind_log_odds(source, word, n) %>% 
+  arrange(desc(tf_idf)) %>% 
+  filter(word_total > 2)
+"
+"2","Error in tbl[[term]] : subscript out of bounds
+"
