@@ -1,0 +1,7 @@
+"0","fts <- read_excel(""./data/FTS_Ukraine_Flash_Appeal_2022_flows_as_on_2023-01-19.xlsx"", 
+           sheet = ""Export data"", 
+           skip = 2) %>% 
+  clean_names() 
+"
+"2","Error: `path` does not exist: ‘./data/FTS_Ukraine_Flash_Appeal_2022_flows_as_on_2023-01-19.xlsx’
+"
