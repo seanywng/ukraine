@@ -162,6 +162,27 @@ pcode1_shape <- st_read("./ukr_adm_sspe_20221005_em/ukr_admbnda_adm1_sspe_202210
 ```
 
 ```{r}
+9605604   804 UKR78439     
+2 9586119   804 UKR77440     
+3 9483210   804 UKR69469     
+4 9416844   804 UKR61501     
+5 9416845   804 UKR59894     
+6 9416849   804 UKR55692     
+7 9416850   804 UKR52830     
+8 9416852   804 UKR52283
+
+acled %>% filter(id %in% c(9605604, 
+                           9586119, 
+                           9416844, 
+                           9416845,
+                           9416849,
+                           9416850,
+                           9416852)) %>% 
+  pull(notes)
+```
+
+
+```{r}
 tf_idf_acled_words %>% 
   group_by(word) %>% 
   summarise(n = sum(n), 

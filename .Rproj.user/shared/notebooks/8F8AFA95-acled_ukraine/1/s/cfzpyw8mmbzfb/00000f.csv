@@ -1,0 +1,37 @@
+"0","acled %>% filter(id %in% c(9605604, 
+                           9586119, 
+                           9416844, 
+                           9416845,
+                           9416849,
+                           9416850,
+                           9416852)) %>% 
+  pull(notes)
+"
+"1","[1]"
+"1"," ""Interception: On 27 October 2022, Ukrainian naval forces intercepted a Russian kamikaze-drone in the Black sea (coded to Western Black Sea).""                                                                                                                                                                                                                                 "
+"1","
+"
+"1","[2]"
+"1"," ""Interception: On 17 October 2022, Ukrainian air defence forces shot down a Russian drone over Eastern Black Sea.""                                                                                                                                                                                                                                                             "
+"1","
+"
+"1","[3]"
+"1"," ""On 20 June 2022, Ukrainian forces launched a missile strike on the drilling rigs in the Eastern Black Sea, also known as the 'Boyko Towers', which were captured by Russia in 2014. The Boyko Towers were used not only for gas production in the Black Sea, but also for surveillance. The head of the Crimean occupying administration claimed that civilians were wounded."""
+"1","
+"
+"1","[4]"
+"1"," ""Interception: On 4 June 2022, Ukrainian forces shot down Russian 'Forpost' drones over the Western Black Sea.""                                                                                                                                                                                                                                                                "
+"1","
+"
+"1","[5]"
+"1"," ""On 13 April 2022, Ukrainian forces hit the Russian warship 'Moskva' with two Neptune anti-ship cruise missiles and that these sparked the fire that detonated the ammunition in Eastern Black Sea. At least 37 Russian soldiers were killed, around 100 were wounded.""                                                                                                        "
+"1","
+"
+"1","[6]"
+"1"," ""On 6 March 2022, the Ukrainian air force shot down a Russian plane in the waters of Eastern Black Sea. Casualties unknown.""                                                                                                                                                                                                                                                   "
+"1","
+"
+"1","[7]"
+"1"," ""On 26 February 2022, the Ukrainian air force shot down a Russian fighter aircraft Su-30 in the waters of Eastern Black Sea. Casualties unknown.""                                                                                                                                                                                                                              "
+"1","
+"

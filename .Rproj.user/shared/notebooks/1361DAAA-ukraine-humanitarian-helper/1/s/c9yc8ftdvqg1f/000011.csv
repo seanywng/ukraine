@@ -1,0 +1,4 @@
+"0","  sprintf(paste0('<a href=""', URLdecode(val),'"" target=""_blank"">', substr(val, 37, 85) ,'</a>'))
+"
+"2","Error in vapply(URL, function(URL) { : object 'val' not found
+"

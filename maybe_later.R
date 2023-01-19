@@ -172,3 +172,4 @@ frequency_by_source <- function(tbl, source) {
 
 frequency_by_source(tf_idf, "UNDP")
 
+![](./plots/title_network_graph.png)

@@ -3,6 +3,9 @@ event_type <- acled %>%
   # mutate(event_type = ifelse(event_type == "Protests" | event_type == "Riots", 
   #                            "Protests & riots", 
   #                            event_type)) %>% 
+  # Filtering out the 8 events that are listed in the Black Sea 
+  # It just makes the GIF look nicer 
+  filter(latitude > 44.0665930) %>% 
   mutate(month = floor_date(event_date, "month")) %>% 
   mutate(month = map(month, ~ seq.Date(as.Date(.), 
                                        as.Date("2022/12/31"), 
