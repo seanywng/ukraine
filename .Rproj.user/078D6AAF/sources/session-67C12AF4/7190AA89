@@ -1,0 +1,29 @@
+{
+    "id": "7190AA89",
+    "path": "~/R/ukraine-humanitarian-helper/initial_text_mining.Rmd",
+    "project_path": "initial_text_mining.Rmd",
+    "type": "r_markdown",
+    "hash": "1048849497",
+    "contents": "",
+    "dirty": false,
+    "created": 1674094862755.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "1122,3",
+        "scrollLine": "1086",
+        "last_setup_crc32": "",
+        "docOutlineSize": "103",
+        "docOutlineVisible": "1"
+    },
+    "folds": "1094|31|1122|0|\n",
+    "lastKnownWriteTime": 1674201620,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1674201620371,
+    "read_only": false,
+    "read_only_alternatives": []
+}

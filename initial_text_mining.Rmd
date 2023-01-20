@@ -679,7 +679,7 @@ save_bigrams <- function(df, filename) {
          subtitle = "2022-01-01 to 2023-01-01")
   
   ggsave(plot = bigram_patchwork,
-         filename = paste0("./plots/bigram_source_odds1/",filename, ".png"),
+         filename = paste0("./plots/fts_nofilter/",filename, ".png"),
          device = "png",
          dpi = 300, height = 11, width = 14, units = "in")
   
@@ -1069,6 +1069,60 @@ words_id %>%
 
 ```
 
+```{r}
+words_search <- rw %>% 
+  select(id, source, body) %>% 
+  filter(source %out% c("ACLED", "OSCE", "IAEA")) %>% 
+  unnest_tokens(word, body) %>% 
+  # mutate(word = str_remove_all(word, " \\'s")) %>%
+  count(id, word, sort = TRUE) %>% 
+  anti_join(stop_words, by = "word") %>% 
+  filter(str_detect(word, "[a-z]")) %>%
+  filter(!str_detect(word, "\\.(com|org|edu|gov)")) %>% 
+  mutate(stem = wordStem(word, language = "porter")) %>% 
+  filter(stem %out% c("de", "des", "la", "las", "le", "les", 
+                      "en", "el", "http", "se", "ses")) %>% 
+  # filter(!str_detect(word, "ukraine|ukrainian|people|humanitarian|support|including|country|\\.")) %>% 
+  # mutate(stem = recode(stem, 
+  #                      "ukraine’" = "ukrain")) %>% 
+  filter(nchar(stem) < 20)
+
+words_search %>% write_csv("./data/words_search.csv")
+```
+
+
+
+```{r dt-pairwise-words-search}
+words_search %>%  
+  filter(word %out% c("pending", "receipt", "delayed", 
+                      "corrobration", "corrobration")) %>% 
+  distinct(id, word) %>% 
+  add_count(word) %>% 
+  filter(n >= 100) %>% 
+  pairwise_cor(word, id, sort = TRUE) %>%
+  rename(word = item1, match = item2) %>% 
+  group_by(word) %>% 
+  top_n(correlation, n = 20) %>% 
+  datatable(filter = list(position = "top", clear = FALSE), 
+            options = list(pageLength = 10, scrollX = TRUE,
+                           search = list(regex = TRUE)
+  #                         
+  #                         ,
+  #                                         initComplete = htmlwidgets::JS(
+  #        "function(settings, json) {",
+  #        paste0("$(this.api().table().container()).css({'font-size': '", "8.5pt", "'});"),
+  #        "}")
+       ),
+  caption = htmltools::tags$caption(style = 'caption-side: top; 
+                                    text-align: center; 
+                                    color:black; font-size:140% ;',
+                                    "Pairwise correlations in Reliefweb Ukraine articles")
+     ) %>% 
+  formatRound(c("correlation"), digits = 3)
+
+```
+
+
 ```{r dt-check-bigrams}
 
 ukr_links %>% 
@@ -1119,7 +1173,12 @@ Ok, a few things -- you're gonna need a lot more work in this section. You just 
 fts <- read_excel("./data/FTS_Ukraine_2022_flows_2022_as_on_2023-01-19.xlsx", 
            sheet = "Export data", 
            skip = 2) %>% 
-  clean_names() 
+  clean_names() %>% 
+  mutate(source_org = ifelse(str_detect(source_org, "UNICEF National Committee"), 
+                             "UNICEF National Committees", 
+                             source_org))
+
+
   
 ```
 
@@ -1193,6 +1252,12 @@ donor_cluster %>%
 
 
 ```
+
+```{r}
+fts %>% 
+  filter(flow_id == 247379) %>% pull(description)
+```
+
 
 ```{r}
 donor_cluster %>% 
@@ -1336,10 +1401,176 @@ plot_money <- function(tbl, var_name) {
 plot_money(donor_cluster, "sector")
 ```
 
+
+
+### FTS bigrams
 ```{r}
 
+fts %>% filter(is.na(sector)) %>% 
+  summarise_at("amount us", sum)
+  
+fts %>%
+  mutate(desription = str_replace_all(description, "\\\n|\\\t|\\/|\\:", " ")) %>% 
+  mutate(usd = ifelse(amount_us > amount_shared_on_boundary, 
+                         amount_us, 
+                         amount_shared_on_boundary))  %>% 
+  ggplot(aes(x = usd)) + 
+  geom_histogram() + 
+  scale_x_continuous(trans = "log10")
+  unnest_tokens(bigram, description, token = "ngrams", n = 2) %>% 
+  filter(!is.na(bigram)) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+  mutate(word = str_remove_all(word1, " \\'s"), 
+         word2 = str_remove_all(word2, "\\'s")) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
+  unite(bigram, word1, word2, sep = " ")
+  
+
+fts %>% count(description, sort = TRUE)
+```
+
+```{r}
+fts_bigrams <- fts %>%
+  mutate(desription = str_replace_all(description, "\\\n|\\\t|\\/|\\:", " ")) %>% 
+  mutate(usd = ifelse(amount_us > amount_shared_on_boundary, 
+                         amount_us, 
+                         amount_shared_on_boundary))  %>%
+  unnest_tokens(bigram, description, token = "ngrams", n = 2) %>% 
+  filter(!is.na(bigram)) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
+  filter(str_detect(word1, "[a-z]") & str_detect(word2, "[a-z]")) %>% 
+  unite(bigram, word1, word2, sep = " ")
+
+
+```
+
+```{r}
+fts_bigrams %>% 
+  group_by(bigram) %>% 
+  summarise(usd = mean(usd, na.rm = TRUE)) %>% 
+  ggplot(aes(x = usd)) + 
+  geom_histogram() + 
+  scale_x_log10()
+
+fts_bigrams %>% 
+  glimpse()
 ```
 
 
 
+
+```{r}
+tf_idf_bigrams <- bigrams %>%
+  count(id, bigram) %>% 
+  bind_tf_idf(bigram, id, n) %>% 
+  bind_log_odds(bigram, id, n) %>% 
+  arrange(desc(tf_idf)) %>% 
+  left_join(rw %>% 
+              select(id, source), 
+            by = "id") %>% 
+  filter(bigram %out% c("million people", "humanitarian assistance")) %>% 
+  rename(word = bigram)  
+  filter(n > 1)
+
+# Cut-off point checker
+fts_tf_idf_bigrams %>% 
+  ggplot(aes(x = n)) + 
+  geom_histogram() + 
+  scale_x_log10() + 
+  scale_y_log10() + 
+  geom_vline(xintercept = 2, lty = 2, colour = "red") + 
+  geom_vline(xintercept = 3, lty = 2, colour = "orange") + 
+  labs(title = "Possible cut-off points for bigrams")
+```
+
+
+### Tf-idf FTS
+
+```{r}
+fts_tf_idf_bigrams <- fts_bigrams %>%
+  count(source_org, bigram) %>%
+  bind_tf_idf(bigram, source_org, n) %>%
+  bind_log_odds(bigram, source_org, n) %>% 
+  rename(word = bigram)
+
+
+  left_join(fts_bigrams %>%
+              select(flow_id, usd, source_org, destination_org),
+            by = "flow_id")
+  
+five_flows <- fts %>%
+  group_by(source_org) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n)) %>% 
+  filter(n > 5) %>% 
+  pull(source_org)
+
+
+```
+
+```{r}
+save_fts_bigrams <- function(df, filename) {
+  
+  bigram_patchwork <- df %>% 
+    group_by(word) %>% 
+    slice_max(tf, n = 1) %>% 
+    ungroup() %>% 
+    arrange(desc(tf)) %>% 
+    head(10) %>% 
+    ggplot(aes(x = tf, 
+               y = fct_reorder(word, tf, .fun = mean)))+
+    geom_col(show.legend = FALSE, 
+             fill = "cornflowerblue", 
+             alpha = .65) + 
+    labs(x = "Tf FTS", y = "", 
+         title = paste0("Tf FTS: ", filename), 
+         subtitle = "2022-01-01 to 2023-01-01") + 
+
+  df %>%
+    group_by(word) %>% 
+    slice_max(tf_idf, n = 1) %>% 
+    ungroup() %>% 
+    arrange(desc(tf_idf)) %>% 
+    head(10) %>%
+    ggplot(aes(x = tf_idf, 
+               y = fct_reorder(word, tf_idf, .fun = mean)))+
+    geom_col(show.legend = FALSE, 
+             fill = "tomato", 
+             alpha = .65) + 
+    labs(x = "Tf-idf FTS", y = "", 
+         title = paste0("Tf-idf FTS: ", filename), 
+         subtitle = "2022-01-01 to 2023-01-01") +
+  
+  df %>% 
+    filter(!is.infinite(log_odds_weighted)) %>% 
+    group_by(word) %>% 
+    slice_max(log_odds_weighted, n = 1) %>% 
+    ungroup() %>% 
+    arrange(desc(log_odds_weighted)) %>% 
+    head(10) %>%
+    ggplot(aes(x = log_odds_weighted, 
+               y = fct_reorder(word, log_odds_weighted, .fun = mean)))+
+    geom_col(show.legend = FALSE, 
+             fill = "forestgreen", 
+             alpha = .65) + 
+    labs(x = "Log-odds FTS", y = "", 
+         title = paste0("Log-odds FTS: ", filename), 
+         subtitle = "2022-01-01 to 2023-01-01")
+  
+  ggsave(plot = bigram_patchwork,
+         filename = paste0("./plots/fts_nofilter/",filename, ".png"),
+         device = "png",
+         dpi = 300, height = 9, width = 14, units = "in")
+  
+}
+```
+
+
+```{r}
+fts_tf_idf_bigrams %>%
+  filter(source_org %in% five_flows) %>% 
+  nest(-source_org) %$%
+  walk2(data, source_org, save_fts_bigrams)
+```
 
