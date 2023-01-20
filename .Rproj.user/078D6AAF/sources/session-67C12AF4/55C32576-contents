@@ -33,6 +33,8 @@ always_allow_html: true
         max-width: 1280px;
     }
 </style>
+
+
 ```
 
 ```{r setup, include=FALSE}
@@ -187,9 +189,9 @@ Finally, we also evaluate words within a corpus by looking at their log-odds. Wh
 
 A series of plots has been generated for each source with more than 5 contributions to RW in 2022 about Ukraine. Each plot shows the top bigrams by term frequency, tf-idf and log-odds.
 
-The organisations below are just a small selection of all bigram plots by source. All the plots may be viewed [here](). 
+The organisations below are just a small selection of all bigram plots by source. All the plots may be viewed [here](https://github.com/seanywng/ukraine-humanitarian-helper/tree/main/plots/bigram_source_odds1). 
 
-If you see a bigram you're curious about, just make use of the **Bigram Search Helper**. Just type the bigram or source or date into the relevant searchbox. 
+If you see a bigram you're curious about, just make use of the **[Bigram Search Helper](https://seanywng.github.io/ukraine-humanitarian-helper/#Bigram_search_helper)**. Just type the bigram or source or date into the relevant searchbox. 
 
 <br><br>
 
@@ -263,7 +265,7 @@ Also unsurprisingly, USAID seems to be much more vocal about Russian attacks, wh
 
 Finally, let's take a look at ACLED. It should be quite apparent why I would want to analyse ACLED conflict event descriptions on their own -- what has been uploaded to RW are just ACLED's weekly reports, which cover Ukraine, but other things as well, such as `presidential elections`, the `overturn` of `roe` as well as mentions of `germany police`. This corpus is polluted. Furthermore, it provides irrelevant data to persons who search up ACLED on RW -- muddying the waters on one of main sources of incident tracking is quite unforgivable. 
 
-See [here]() for a bigram network graph based on ACLED conflict event descriptions, instead of weekly collated reports. Immediately, one can see that the level of detail and utility is markedly different and the ACLED dataset contains much richer textual data than what has been uploaded to RW. 
+[Download](https://github.com/seanywng/ukraine-humanitarian-helper/raw/main/plots/acled_network_graph_fr.png) a bigram network graph based on ACLED conflict event descriptions, instead of on weekly collated reports. Immediately, one can see that the level of detail and utility is markedly different and the ACLED dataset contains much richer textual data than what has been uploaded to RW. 
 
 <br><br><br>
 
@@ -329,10 +331,14 @@ rbind(
             options = list(pageLength = 10, 
                            scrollX = TRUE,
                            autoWidth = TRUE, 
-                           columnDefs = list(
-                             list(width = "80px", targets = 1:4),
-                             list(width = "180px", targets = 4), 
-                             list(width = "100px", targets = 5)),
+                           #columnDefs = list(
+                           #  list(width = "20px", targets = 1),
+                           #  list(width = "40px", targets = 2), 
+                           #  list(width = "20px", targets = 3),
+                           #  list(width = "40px", targets = 4),
+                           #  list(width = "80px", targets = 5), 
+                           #  list(width = "50px", targets = 6)),
+                           #fixedolumns = TRUE,
                            search = list(regex = TRUE)
                            
                            ,
