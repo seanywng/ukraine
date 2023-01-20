@@ -88,7 +88,14 @@ more_than_5 <- rw %>%
 
 ## Introduction 
 
+[![sources scatterplot](./plots/sources_scatter.png)](https://raw.githubusercontent.com/seanywng/ukraine-humanitarian-helper/main/plots/sources_scatter.png){target="_blank"}
+*[Full-sized plot](https://raw.githubusercontent.com/seanywng/ukraine-humanitarian-helper/main/plots/sources_scatter.png){target="_blank"}*
+
+<br>
+
 Text mining and analytics were conducted on a dataset of scraped Reliefweb.int (RW) articles on Ukraine. Articles were limited to the year 2022 and the English language. A total of `r nrow(ukr_links) %>% format(big.mark = ",")` documents were scraped, tokenised and all stop words (the, a, we, can) were removed. 
+
+As can be seen from the scatterplot above, the main actors in the response are immediately visible, whether they be UN, NGOs or donors, 
 
 A brief examination of the most common word pairs in RW articles on Ukraine yields this network graph. Only more common word pairs have been included and the thickness of the line between them indicates the number of times this pair appears in the corpus. 
 
@@ -338,7 +345,7 @@ rbind(
                            #  list(width = "40px", targets = 4),
                            #  list(width = "80px", targets = 5), 
                            #  list(width = "50px", targets = 6)),
-                           #fixedolumns = TRUE,
+                           fixedcolumns = TRUE,
                            search = list(regex = TRUE)
                            
                            ,
