@@ -1,7 +1,7 @@
 ---
 title: "Initial Text mining Reliefweb articles on Ukraine"
 author: "Sean Ng"
-date: "21 January 2024"
+date: "21 January 2023"
 output: 
   html_document:
     theme: readable
