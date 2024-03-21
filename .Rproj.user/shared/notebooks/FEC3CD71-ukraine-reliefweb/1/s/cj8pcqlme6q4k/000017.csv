@@ -1,0 +1,29 @@
+"0","words_search %>%  
+  filter(word %out% c(""pending"", ""receipt"", ""delayed"", 
+                      ""corrobration"", ""corrobration"")) %>% 
+  distinct(id, word) %>% 
+  add_count(word) %>% 
+  filter(n >= 100) %>% 
+  pairwise_cor(word, id, sort = TRUE, upper = FALSE) %>%
+  rename(word = item1, match = item2) %>% 
+  group_by(word) %>% 
+  top_n(correlation, n = 20) %>% 
+  datatable(filter = list(position = ""top"", clear = FALSE), 
+            options = list(pageLength = 10, scrollX = TRUE,
+                           search = list(regex = TRUE)
+  #                         
+  #                         ,
+  #                                         initComplete = htmlwidgets::JS(
+  #        ""function(settings, json) {"",
+  #        paste0(""$(this.api().table().container()).css({'font-size': '"", ""8.5pt"", ""'});""),
+  #        ""}"")
+       ),
+  caption = htmltools::tags$caption(style = 'caption-side: top; 
+                                    text-align: center; 
+                                    color:black; font-size:140% ;',
+                                    ""Pairwise correlations in Reliefweb Ukraine articles"")
+     ) %>% 
+  formatRound(c(""correlation""), digits = 3)
+"
+"2","Warning: It seems your data is too big for client-side DataTables. You may consider server-side processing: https://rstudio.github.io/DT/server.html"
+"2","Warning: It seems your data is too big for client-side DataTables. You may consider server-side processing: https://rstudio.github.io/DT/server.html"

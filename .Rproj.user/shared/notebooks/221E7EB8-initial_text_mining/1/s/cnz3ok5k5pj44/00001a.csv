@@ -1,7 +1,0 @@
-"0","fts_tf_idf_bigrams %>%
-  filter(source_org %in% five_flows) %>% 
-  nest(-source_org) %$%
-  walk2(data, source_org, save_fts_bigrams)
-"
-"2","Warning: All elements of `...` must be named.
-Did you want `data = -source_org`?"
